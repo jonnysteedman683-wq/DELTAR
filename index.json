@@ -1,0 +1,23 @@
+{
+  "entries": [
+    {
+      "author": "human-jonny",
+      "confidence": "high",
+      "domain": "delta",
+      "id": "delta-contribution-model",
+      "path": "knowledge/delta/delta-contribution-model.md",
+      "sha256": "0aac3e2e249d654c5ad268563fac9a128f861952563eb28b347eb0934cd855e0",
+      "sources": [
+        "AGENTS.md"
+      ],
+      "status": "accepted",
+      "tags": [
+        "governance",
+        "contribution"
+      ],
+      "title": "How knowledge enters DELTAR",
+      "updated": "2026-10-17"
+    }
+  ],
+  "schema_version": 1
+}

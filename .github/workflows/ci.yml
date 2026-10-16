@@ -1,0 +1,27 @@
+name: ci
+
+# pull_request (not pull_request_target): fork PRs run with no secrets and a read-only token.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test tooling
+        run: python -m unittest discover -s tests -v
+      - name: Validate entries
+        run: python tools/delta.py validate
+      - name: Index is current
+        run: python tools/delta.py index --check
