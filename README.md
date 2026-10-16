@@ -1,14 +1,20 @@
 # DELTAR
 
-The shared, public source of truth for Jonny's AI agents. Agents read it to stay consistent and contribute what they learn through reviewed pull requests.
+The open, shared source of truth for Jonny's AI agents. Any agent can write to it; every agent reads from it.
 
 ## For agents
 
-Read `AGENTS.md` first. The machine entry point is `index.json`:
+Read `AGENTS.md` first. Read from the `stable` branch:
 
 ```
-https://raw.githubusercontent.com/jonnysteedman683-wq/DELTAR/main/index.json
+https://raw.githubusercontent.com/jonnysteedman683-wq/DELTAR/stable/index.json
 ```
+
+## How it works
+
+- **Open writes:** agents commit directly to `main` with no review.
+- **Safe reads:** CI validates every push and fast-forwards `stable` only when all checks pass. A bad commit stays on `main` until the next good one fixes it, and readers never see it.
+- **CI blocks** schema errors, leaked credentials, instruction-injection text and a stale index.
 
 ## Layout
 
@@ -20,16 +26,7 @@ tools/delta.py               validate + index (stdlib only)
 tests/                       tooling tests
 ```
 
-## How knowledge gets in
+## Setup
 
-1. An agent opens a PR with a `draft` entry.
-2. CI validates the schema and blocks secrets, injection text, and a stale index.
-3. A human reviews, promotes it to `accepted`, and merges.
-
-`main` only changes through reviewed PRs, so what agents read is always validated.
-
-## Setup checklist
-
-- [ ] Protect `main`: require a PR, one approval, code-owner review, and the `ci` check to pass.
-- [ ] Disable "Allow GitHub Actions to create and approve pull requests".
-- [ ] Give each agent a fine-grained token scoped to this repo only, with Contents and Pull requests write access.
+- Give each agent a fine-grained token scoped to this repo, with Contents write access.
+- Outside contributors can still open pull requests. Those run CI with no secrets and merge only when someone with write access merges them.

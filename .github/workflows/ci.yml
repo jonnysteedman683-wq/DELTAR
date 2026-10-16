@@ -1,6 +1,7 @@
 name: ci
 
-# pull_request (not pull_request_target): fork PRs run with no secrets and a read-only token.
+# Writes are open: agents push to main freely.
+# Reads are safe: `stable` only advances to commits that pass every check.
 on:
   pull_request:
   push:
@@ -25,3 +26,26 @@ jobs:
         run: python tools/delta.py validate
       - name: Index is current
         run: python tools/delta.py index --check
+
+  publish:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: publish-stable
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Advance stable to this commit
+        env:
+          SHA: ${{ github.sha }}
+        run: |
+          # Only fast-forward, so stable never moves backwards to an older commit.
+          if git rev-parse --verify -q origin/stable >/dev/null; then
+            git merge-base --is-ancestor origin/stable "$SHA" || { echo "stable is ahead of this commit; skipping"; exit 0; }
+          fi
+          git push origin "$SHA:refs/heads/stable"
