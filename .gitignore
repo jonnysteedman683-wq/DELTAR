@@ -5,3 +5,4 @@ __pycache__/
 *.pyz
 RECEIPT____*
 .DS_Store
+.deltar/

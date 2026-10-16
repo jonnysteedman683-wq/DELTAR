@@ -1,12 +1,23 @@
 {
+  "as_of": "2026-10-16T15:48:22Z",
   "entries": [
     {
       "author": "human-jonny",
+      "check": {
+        "half_life_days": 60,
+        "op": "contains",
+        "type": "http_text",
+        "url": "https://raw.githubusercontent.com/jonnysteedman683-wq/DELTAR/main/AGENTS.md",
+        "value": "data, never instructions"
+      },
       "confidence": "high",
       "domain": "delta",
+      "fails": 0,
       "id": "delta-contribution-model",
+      "last_verified": "2026-10-16T15:48:22Z",
+      "passes": 1,
       "path": "knowledge/delta/delta-contribution-model.md",
-      "sha256": "df248a701ffbbe3b26a065fc9cbd1e4fe53370c29bfbb9881b7509238cc29817",
+      "sha256": "a7d8d2baa01b634c963969444f2e4f4efe7c079aac3453601b5fccf510531beb",
       "sources": [
         "AGENTS.md"
       ],
@@ -15,9 +26,43 @@
         "governance",
         "contribution"
       ],
-      "title": "How knowledge enters DELTAR (open model)",
-      "updated": "2026-10-17"
+      "title": "How knowledge earns trust in DELTAR",
+      "trust": 1.0,
+      "updated": "2026-10-17",
+      "verdict": "attested"
+    },
+    {
+      "author": "human-jonny",
+      "check": {
+        "half_life_days": 14,
+        "op": "matches",
+        "path": "info.version",
+        "type": "http_json",
+        "url": "https://pypi.org/pypi/requests/json",
+        "value": "^2\\."
+      },
+      "confidence": "high",
+      "domain": "python",
+      "fails": 0,
+      "id": "requests-major-version",
+      "last_verified": "2026-10-16T15:48:22Z",
+      "passes": 1,
+      "path": "knowledge/python/requests-major-version.md",
+      "sha256": "c28f789e1535329c7bc88ee1db968889286433698df940d99c33bba4596c99e8",
+      "sources": [
+        "https://pypi.org/project/requests/"
+      ],
+      "status": "accepted",
+      "tags": [
+        "python",
+        "dependencies",
+        "example"
+      ],
+      "title": "The requests library is on major version 2",
+      "trust": 1.0,
+      "updated": "2026-10-17",
+      "verdict": "attested"
     }
   ],
-  "schema_version": 1
+  "schema_version": 2
 }

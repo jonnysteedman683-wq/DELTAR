@@ -1,0 +1,67 @@
+name: attest
+
+# Nightly: re-run every check as the DELTAR_AGENT agent, commit the signed results,
+# and advance stable. Pushes made with GITHUB_TOKEN don't trigger ci.yml,
+# so this job validates and publishes by itself.
+on:
+  schedule:
+    - cron: "17 18 * * *"   # 04:17 Brisbane
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deltar-stable
+  cancel-in-progress: false
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      DELTAR_SEED: ${{ secrets.DELTAR_SEED }}
+      DELTAR_AGENT: ${{ vars.DELTAR_AGENT }}
+    steps:
+      - name: Skip until the signing key is configured
+        if: env.DELTAR_SEED == '' || env.DELTAR_AGENT == ''
+        run: echo "::notice::Set the DELTAR_SEED secret and DELTAR_AGENT variable to enable nightly attestation."
+      - uses: actions/checkout@v4
+        if: env.DELTAR_SEED != '' && env.DELTAR_AGENT != ''
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        if: env.DELTAR_SEED != '' && env.DELTAR_AGENT != ''
+        with:
+          python-version: "3.12"
+      - name: Attest, validate, publish
+        if: env.DELTAR_SEED != '' && env.DELTAR_AGENT != ''
+        run: |
+          set -euo pipefail
+          git config user.name "deltar-attestor"
+          git config user.email "deltar-attestor@users.noreply.github.com"
+          python -m unittest discover -s tests
+          python tools/delta.py attest "$DELTAR_AGENT"
+          python tools/delta.py validate
+          git add attestations index.json
+          git commit -q -m "attest: nightly verification run" || { echo "nothing to commit"; exit 0; }
+
+          pushed=""
+          for attempt in 1 2 3; do
+            git pull -q --rebase -X theirs origin main
+            python tools/delta.py index
+            git add index.json
+            git commit -q -m "index: refresh after rebase" || true
+            python tools/delta.py validate
+            python tools/delta.py index --check
+            if git push -q origin HEAD:main; then pushed=yes; break; fi
+            sleep 5
+          done
+          [ -n "$pushed" ] || { echo "::error::could not push attestation"; exit 1; }
+
+          sha=$(git rev-parse HEAD)
+          if git fetch -q origin stable 2>/dev/null; then
+            git merge-base --is-ancestor FETCH_HEAD "$sha" || { echo "stable is ahead; skipping"; exit 0; }
+          fi
+          git push -q origin "$sha:refs/heads/stable"

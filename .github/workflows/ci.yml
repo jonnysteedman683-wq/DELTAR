@@ -34,7 +34,7 @@ jobs:
     permissions:
       contents: write
     concurrency:
-      group: publish-stable
+      group: deltar-stable
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
